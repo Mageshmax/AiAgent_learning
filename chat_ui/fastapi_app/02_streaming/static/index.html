@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!--
+  FastAPI step 2: the chat page, now reading a STREAM.
+  New: readStream() reads the response piece by piece instead of waiting
+  for all of it with response.json().
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Chat Agent</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f4f5; margin: 0; }
+    .app { max-width: 760px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; padding: 0 16px; box-sizing: border-box; }
+    h1 { font-size: 1.4rem; }
+    #chat { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; }
+    .bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; line-height: 1.45; }
+    .user { align-self: flex-end; background: #2563eb; color: white; }
+    .assistant { align-self: flex-start; background: white; border: 1px solid #e4e4e7; }
+    form { display: flex; gap: 8px; padding: 12px 0 20px; }
+    input { flex: 1; padding: 12px; font-size: 1rem; border: 1px solid #d4d4d8; border-radius: 10px; }
+    button { padding: 0 18px; font-size: 1rem; border: 0; border-radius: 10px; background: #2563eb; color: white; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: default; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>🤖 Claude Chat Agent</h1>
+    <div id="chat"></div>
+    <form id="form">
+      <input id="input" placeholder="Ask me anything (weather, time, maths...)" autocomplete="off" autofocus>
+      <button id="send">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+
+    function addBubble(role, text) {
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + role;
+      bubble.textContent = text;
+      chat.appendChild(bubble);
+      chat.scrollTop = chat.scrollHeight;
+      return bubble;
+    }
+
+    // NEW: read an NDJSON stream and call onEvent() for every JSON line.
+    async function readStream(response, onEvent) {
+      const reader = response.body.getReader();  // reads the body in chunks
+      const decoder = new TextDecoder();          // bytes -> text
+      let buffer = "";
+      while (true) {
+        const { value, done } = await reader.read();  // wait for the next chunk
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        // A chunk can end in the middle of a line, so only handle complete
+        // lines and keep the unfinished part in the buffer for next time.
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (line.trim()) onEvent(JSON.parse(line));
+        }
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+
+      addBubble("user", question);
+      input.value = "";
+      send.disabled = true;
+      const bubble = addBubble("assistant", "");
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: question }),
+        });
+        // NEW: add each text piece to the bubble as it arrives.
+        await readStream(response, (ev) => {
+          if (ev.type === "text") {
+            bubble.textContent += ev.text;
+          } else if (ev.type === "tool_call" && bubble.textContent) {
+            bubble.textContent += "\n\n";  // keep text before/after a tool apart
+          }
+          chat.scrollTop = chat.scrollHeight;
+        });
+      } catch (error) {
+        bubble.textContent += "\nError: " + error;
+      }
+
+      send.disabled = false;
+      input.focus();
+    });
+  </script>
+</body>
+</html>

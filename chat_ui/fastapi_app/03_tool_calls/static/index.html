@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!--
+  FastAPI step 3: the chat page, now drawing tool calls.
+  New: an assistant reply is no longer one block of text. It is a bubble
+  holding text parts AND tool boxes, in the order they happened:
+      [text "Let me check..."] [🔧 get_weather box] [text "It's 34°C..."]
+  handleEvent() decides what each streamed event adds to the reply.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Chat Agent</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f4f5; margin: 0; }
+    .app { max-width: 760px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; padding: 0 16px; box-sizing: border-box; }
+    h1 { font-size: 1.4rem; }
+    #chat { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; }
+    .bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; line-height: 1.45; }
+    .user { align-self: flex-end; background: #2563eb; color: white; }
+    .assistant { align-self: flex-start; background: white; border: 1px solid #e4e4e7; }
+    /* NEW: tool boxes */
+    .tool { background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 8px; padding: 6px 10px; margin: 6px 0; font-size: 0.9rem; }
+    .tool summary { cursor: pointer; font-family: ui-monospace, monospace; }
+    .tool pre { margin: 6px 0 0; white-space: pre-wrap; }
+    form { display: flex; gap: 8px; padding: 12px 0 20px; }
+    input { flex: 1; padding: 12px; font-size: 1rem; border: 1px solid #d4d4d8; border-radius: 10px; }
+    button { padding: 0 18px; font-size: 1rem; border: 0; border-radius: 10px; background: #2563eb; color: white; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: default; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>🤖 Claude Chat Agent</h1>
+    <div id="chat"></div>
+    <form id="form">
+      <input id="input" placeholder="Ask me anything (weather, time, maths...)" autocomplete="off" autofocus>
+      <button id="send">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+
+    function addBubble(role, text) {
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + role;
+      bubble.textContent = text;
+      chat.appendChild(bubble);
+      chat.scrollTop = chat.scrollHeight;
+      return bubble;
+    }
+
+    async function readStream(response, onEvent) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (line.trim()) onEvent(JSON.parse(line));
+        }
+      }
+    }
+
+    // NEW: one reply = a bubble + "where does the next text go" + "the open tool box".
+    function startReply() {
+      return { bubble: addBubble("assistant", ""), textPart: null, toolBox: null };
+    }
+
+    // NEW: add one streamed event to a reply.
+    function handleEvent(reply, ev) {
+      if (ev.type === "text") {
+        if (!reply.textPart) {  // first text, or text after a tool box -> new text part
+          reply.textPart = document.createElement("div");
+          reply.bubble.appendChild(reply.textPart);
+        }
+        reply.textPart.textContent += ev.text;
+      } else if (ev.type === "tool_call") {
+        const box = document.createElement("details");  // built-in collapsible box
+        box.className = "tool";
+        const summary = document.createElement("summary");
+        summary.textContent = `🔧 ${ev.name}(${JSON.stringify(ev.input)})`;
+        const result = document.createElement("pre");
+        result.textContent = "running...";
+        box.append(summary, result);
+        reply.bubble.appendChild(box);
+        reply.toolBox = box;
+        reply.textPart = null;  // text after this tool goes BELOW the box
+      } else if (ev.type === "tool_result") {
+        reply.toolBox.querySelector("pre").textContent = ev.result;
+        reply.toolBox.querySelector("summary").textContent += "  ✓";
+      }
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+
+      addBubble("user", question);
+      input.value = "";
+      send.disabled = true;
+      const reply = startReply();
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: question }),
+        });
+        await readStream(response, (ev) => handleEvent(reply, ev));
+      } catch (error) {
+        handleEvent(reply, { type: "text", text: "\nError: " + error });
+      }
+
+      send.disabled = false;
+      input.focus();
+    });
+  </script>
+</body>
+</html>
