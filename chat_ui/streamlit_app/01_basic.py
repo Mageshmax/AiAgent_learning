@@ -25,7 +25,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # so we can import agent_core
 from agent_core import ask_agent
 
-st.title("🤖 Claude Chat Agent")
+st.title("🤖 Claude Chat Agent for magesh")
 
 # The memory. Created once, then kept across reruns.
 if "messages" not in st.session_state:

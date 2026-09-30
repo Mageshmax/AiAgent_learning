@@ -1,0 +1,15 @@
+[
+  {
+    "role": "user",
+    "content": "hello boss, i am gonna call you jarvis"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "text": "Hello, sir. Jarvis it is. How can I help?",
+        "type": "text"
+      }
+    ]
+  }
+]

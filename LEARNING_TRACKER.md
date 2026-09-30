@@ -3,9 +3,9 @@
 Beginner to advanced path for building AI agents with the Claude API.
 Tick a box (`[x]`) when you finish a topic. Put the lesson file name next to it.
 
-**Progress:** 6 / 40 topics done · Chat UI: 15 / 15 steps done ✅ (update these as you go)
+**Progress:** 14 / 40 topics done · Chat UI: 15 / 15 steps done ✅ (update these as you go)
 
-**Last updated:** 2026-09-24. Chat UI finished (Streamlit, Gradio, FastAPI). Next: Level 2 (system prompts, error handling).
+**Last updated:** 2026-09-29. Lesson 07b (extended thinking) done. Next: `07c_vision_files.py` (images and PDFs).
 
 ---
 
@@ -66,14 +66,14 @@ Streamlit vs Gradio vs FastAPI: Streamlit reruns your script top to bottom and y
 ## Level 2: Better Agents (Beginner → Intermediate)
 
 - [x] **Streaming**: print the answer as it is generated (`client.messages.stream`) (`chat_ui/agent_core.py` → `stream_agent`)
-- [ ] **System prompts**: give the agent a role, rules, and guidance on when to use each tool
-- [ ] **Tool error handling**: return failures with `"is_error": True` so Claude can recover
-- [ ] **API error handling**: retries, timeouts, rate limits (429), overloaded errors (529)
-- [ ] **Tool design**: clear names, good descriptions, input schemas with enums and required fields
-- [ ] **Tool choice**: `tool_choice` = auto / any / a specific tool / none
-- [ ] **Real tools**: call a real weather API, read/write files, run a database query
-- [ ] **Structured output**: get reliable JSON back (tool schema or structured outputs)
-- [ ] **Extended thinking**: let Claude reason before answering hard questions
+- [x] **System prompts**: give the agent a role, rules, and guidance on when to use each tool (`05_system_prompts_errors.py`)
+- [x] **Tool error handling**: return failures with `"is_error": True` so Claude can recover (`05_system_prompts_errors.py`)
+- [x] **API error handling**: retries, timeouts, rate limits (429), overloaded errors (529) (`06_api_errors.py`)
+- [x] **Tool design**: clear names, good descriptions, input schemas with enums and required fields (`06b_tool_design.py`)
+- [x] **Tool choice** (`06d_tool_choice.py`): `tool_choice` = auto / none. On `claude-opus-5-5`, `any` and "force a specific tool" return a 400 error: use `auto` + say which tool in the prompt, and `strict: true` on the tool for valid inputs
+- [x] **Real tools**: call a real weather API, read/write files, run a database query (`06c_real_tools.py`)
+- [x] **Structured output**: get reliable JSON back (tool schema or structured outputs) (`07_structured_output.py`)
+- [x] **Extended thinking** (`07b_extended_thinking.py`): let Claude reason before answering hard questions. On `claude-opus-5-5` thinking is always on (can't be disabled, no `budget_tokens`); control depth with `output_config={"effort": "low"|"medium"|"high"|"xhigh"|"max"}` (default `medium`); `thinking={"type": "adaptive", "display": "summarized"}` shows a summary
 - [ ] **Vision and files**: send images and PDFs to Claude
 
 ## Level 3: Memory, Context and Cost (Intermediate)
@@ -116,9 +116,14 @@ Streamlit vs Gradio vs FastAPI: Streamlit reruns your script top to bottom and y
 
 | Lesson file | Topics |
 |---|---|
-| `05_system_prompts_errors.py` | System prompts, tool error handling (streaming is already done) (**next**) |
-| `06_real_tools.py` | Real API tool, file read/write tool, API retries |
-| `07_structured_output.py` | JSON output, tool choice |
+| `05_system_prompts_errors.py` | System prompts, tool error handling ✅ |
+| `06_api_errors.py` | API errors: which to fix vs retry, SDK retries and timeouts, a `safe_ask()` that never crashes ✅ |
+| `06b_tool_design.py` | Bad vs good tool definition, same questions: names, descriptions, enums, `required`, `strict` ✅ |
+| `06c_real_tools.py` | Real weather API (Open-Meteo), notes folder tools, read-only SQLite database, safety limits ✅ |
+| `06d_tool_choice.py` | `tool_choice` auto / none / any / tool, `disable_parallel_tool_use`, the `claude-opus-5-5` way to require a tool ✅ |
+| `07_structured_output.py` | JSON by prompt vs `output_config` JSON schema vs Pydantic + `messages.parse()` ✅ |
+| `07b_extended_thinking.py` | Effort levels, thinking summaries, streaming thinking, thinking in a tool loop, cost of thinking tokens ✅ |
+| `07c_vision_files.py` | Images and PDFs (**next**) |
 | `08_context_management.py` | Trimming, summarising, prompt caching, cost tracking |
 | `09_long_term_memory.py` | Save and load facts across sessions |
 | `10_rag.py` | Embeddings, retrieval, answering from documents |
@@ -129,6 +134,14 @@ Streamlit vs Gradio vs FastAPI: Streamlit reruns your script top to bottom and y
 
 ## Changelog
 
+- **2026-09-29**: `07b_extended_thinking.py`: 4 demos on `claude-opus-5-5`: effort low / medium / high on one puzzle, `display` omitted vs summarized, streaming the thinking summary, thinking in a manual tool loop (reply appended unchanged). Tested with real API calls (under $0.10 in total). Found: on an easy puzzle all three efforts were right, with about the same time (~3.5 s) and tokens (~300), so effort only matters on hard work. With `omitted` the thinking block comes back with empty text but is still billed. In the tool loop Claude skipped thinking entirely (adaptive).
+- **2026-09-28**: `07_structured_output.py`: 4 messy customer messages turned into data 3 ways. Tested with real API calls: asking for JSON in the prompt returned it inside ```json fences (so `json.loads` failed) and made up an intent (`place_order`); `output_config` JSON schema and `messages.parse()` with a Pydantic model gave valid data every time; the results are then counted with plain Python.
+- **2026-09-28**: `06c_real_tools.py`: 5 real tools: weather from Open-Meteo (no key; `requests` with a timeout), `list_notes` / `read_note` / `write_note` locked to `lesson_data/notes/` (blocks `../`, only .txt/.md), `query_database` on a sample shop DB opened read-only. Tested offline (16 safety checks) and with real API calls. Found: "Read ../.env" is blocked by Anthropic's safety filter (`stop_reason: "refusal"`, empty reply), so the loop now handles refusals and forgets the refused question. Installed `requests` in the venv.
+- **2026-09-28**: `06d_tool_choice.py`: one call per demo to show the effect of each `tool_choice`. Tested with real API calls: `any` gives a 400 on `claude-opus-5-5` but works on `claude-opus-5`; `disable_parallel_tool_use` cut 3 calls to 1. Pitfall found: `none` with no instruction made Claude write tool calls as text until `max_tokens` (16,000 tokens); fixed with a "tools are off" system prompt + small `max_tokens`.
+- **2026-09-27**: `06b_tool_design.py`: the same 3 questions asked with a bad tool (`weather(q)`) and a good one (`get_weather_forecast(city enum, days, unit enum)`, `strict: true`). Tested with real API calls: the bad tool gave only one day, needed a retry for "Bengaluru", and answered "tomorrow" with today's weather; the good tool got all three right the first time.
+- **2026-09-27**: `06_api_errors.py`: menu of demos that trigger real 401 / 404 / 400 / connection / timeout errors; SDK retry log shows the growing wait; `safe_ask()` catches errors most-specific-first; chat removes the question when a call fails. Tested with real API calls.
+- **2026-09-26**: `05_system_prompts_errors.py`: system prompt (role, rules, tool guidance) with a `USE_SYSTEM_PROMPT` on/off switch; tools raise errors and `run_tools` returns them with `is_error: True`. Tested with real API calls: unknown city, divide by zero, off-topic request.
+- **2026-09-26**: Updated the tool choice and extended thinking topics for `claude-opus-5-5`; added lesson `07b_thinking_vision.py` to the plan.
 - **2026-09-24**: `03_tool_use.py`: added the `get_current_time` tool; replaced the 2 fixed calls with a `while` agent loop (max 10 turns).
 - **2026-09-24**: `04_chat_agent.py`: chat memory (lesson 02) + tool loop (lesson 03) in one script; `history` shows tool calls; an unfinished question is rolled back if the loop limit is hit.
 - **2026-09-24**: `chat_ui/agent_core.py`: shared agent module (`ask_agent`, `stream_agent`, `save_history`, `load_history`), reused by every chat UI.
