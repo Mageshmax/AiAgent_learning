@@ -3,9 +3,9 @@
 Beginner to advanced path for building AI agents with the Claude API.
 Tick a box (`[x]`) when you finish a topic. Put the lesson file name next to it.
 
-**Progress:** 14 / 40 topics done · Chat UI: 15 / 15 steps done ✅ (update these as you go)
+**Progress:** 14 / 40 topics done · Lessons written: 40 / 40 📘 · Chat UI: 15 / 15 steps done ✅ (update these as you go)
 
-**Last updated:** 2026-09-29. Lesson 07b (extended thinking) done. Next: `07c_vision_files.py` (images and PDFs).
+**Last updated:** 2026-09-30. Lessons for all 26 remaining topics written and tested (📘 = lesson ready, study it and tick the box). Next: `07c_vision_files.py` (images and PDFs).
 
 ---
 
@@ -74,45 +74,47 @@ Streamlit vs Gradio vs FastAPI: Streamlit reruns your script top to bottom and y
 - [x] **Real tools**: call a real weather API, read/write files, run a database query (`06c_real_tools.py`)
 - [x] **Structured output**: get reliable JSON back (tool schema or structured outputs) (`07_structured_output.py`)
 - [x] **Extended thinking** (`07b_extended_thinking.py`): let Claude reason before answering hard questions. On `claude-opus-5-5` thinking is always on (can't be disabled, no `budget_tokens`); control depth with `output_config={"effort": "low"|"medium"|"high"|"xhigh"|"max"}` (default `medium`); `thinking={"type": "adaptive", "display": "summarized"}` shows a summary
-- [ ] **Vision and files**: send images and PDFs to Claude
+- [ ] **Vision and files**: send images and PDFs to Claude (📘 `07c_vision_files.py`)
 
 ## Level 3: Memory, Context and Cost (Intermediate)
 
-- [ ] **Context window limits**: why `messages` can't grow forever
-- [ ] **Trimming and summarising**: keep the last N turns, summarise older ones
-- [ ] **Long-term memory**: save facts to a file or database and load them in later sessions (started: whole chat saved to JSON in `streamlit_app/05_save_history.py`; still to do: save *facts* instead of the whole chat)
-- [ ] **Prompt caching**: cache the unchanging start of the prompt to cut cost and latency
-- [ ] **Token and cost tracking**: add up usage per session; estimate cost
-- [ ] **Model selection**: when to use Haiku vs Sonnet vs Opus
+- [ ] **Context window limits**: why `messages` can't grow forever (📘 `08_context_management.py`)
+- [ ] **Trimming and summarising**: keep the last N turns, summarise older ones; server-side compaction (📘 `08_context_management.py`)
+- [ ] **Long-term memory**: save facts to a file or database and load them in later sessions (📘 `09_long_term_memory.py`: `remember` / `forget` tools + extracting facts after a chat)
+- [ ] **Prompt caching**: cache the unchanging start of the prompt to cut cost and latency (📘 `08b_prompt_caching.py`)
+- [ ] **Token and cost tracking**: add up usage per session; estimate cost (📘 `08c_cost_tracking.py`)
+- [ ] **Model selection**: when to use Haiku vs Sonnet vs Opus (📘 `08d_model_selection.py`)
 
 ## Level 4: Agent Patterns (Intermediate → Advanced)
 
-- [ ] **ReAct**: think, act, observe, repeat
-- [ ] **Plan-and-execute**: write a plan first, then carry it out step by step
-- [ ] **Reflection / self-critique**: the agent checks and fixes its own answer
-- [ ] **SDK Tool Runner**: the built-in tool loop (`client.beta.messages.tool_runner`) vs your manual loop
-- [ ] **RAG**: embeddings, vector store, retrieve relevant chunks, answer from your own documents
-- [ ] **Web search / web fetch tools**: server-side tools that Claude runs for you
-- [ ] **Code execution tool**: let Claude run code in a sandbox
-- [ ] **Multi-agent systems**: orchestrator + specialist sub-agents; agents reviewing each other
-- [ ] **MCP (Model Context Protocol)**: connect ready-made tool servers; build your own MCP server
-- [ ] **Claude Agent SDK**: build agents on the same framework as Claude Code
+- [ ] **ReAct**: think, act, observe, repeat (📘 `11_planning_agent.py`)
+- [ ] **Plan-and-execute**: write a plan first, then carry it out step by step (📘 `11_planning_agent.py`)
+- [ ] **Reflection / self-critique**: the agent checks and fixes its own answer (📘 `11_planning_agent.py`)
+- [ ] **SDK Tool Runner**: the built-in tool loop (`client.beta.messages.tool_runner`) vs your manual loop (📘 `11b_tool_runner.py`)
+- [ ] **RAG**: embeddings, vector store, retrieve relevant chunks, answer from your own documents (📘 `10_rag.py`)
+- [ ] **Web search / web fetch tools**: server-side tools that Claude runs for you (📘 `11c_server_tools.py`)
+- [ ] **Code execution tool**: let Claude run code in a sandbox (📘 `11c_server_tools.py`)
+- [ ] **Multi-agent systems**: orchestrator + specialist sub-agents; agents reviewing each other (📘 `12_multi_agent.py`)
+- [ ] **MCP (Model Context Protocol)**: connect ready-made tool servers; build your own MCP server (📘 `13_mcp_server.py` + `13_mcp_client.py`)
+- [ ] **Claude Agent SDK**: build agents on the same framework as Claude Code (📘 `13b_agent_sdk.py`)
 
 ## Level 5: Production (Advanced)
 
-- [ ] **Guardrails**: validate tool inputs, allow-lists, limit what tools can do
-- [ ] **Human-in-the-loop**: ask for approval before risky actions (delete, send, pay)
-- [ ] **Prompt injection defence**: treat tool results and web content as data, not instructions
-- [ ] **Evaluation**: test sets with expected results; LLM-as-judge; compare prompt versions
-- [ ] **Observability**: log every call, tool use, result and token count; trace a full agent run
-- [ ] **Async and parallel tools**: run independent tool calls at the same time
-- [ ] **Batch API**: process many requests cheaply when you don't need instant answers
-- [ ] **Deployment**: wrap the agent in a web API (FastAPI) or a simple UI (started: web API + UI built in `chat_ui/fastapi_app/`, runs locally; still to do: put it on a server, authentication, HTTPS)
-- [ ] **Capstone project**: build a complete agent that solves a real problem end to end
+- [ ] **Guardrails**: validate tool inputs, allow-lists, limit what tools can do (📘 `15_guardrails_hitl.py`)
+- [ ] **Human-in-the-loop**: ask for approval before risky actions (delete, send, pay) (📘 `15_guardrails_hitl.py`)
+- [ ] **Prompt injection defence**: treat tool results and web content as data, not instructions (📘 `15b_prompt_injection.py`)
+- [ ] **Evaluation**: test sets with expected results; LLM-as-judge; compare prompt versions (📘 `14_eval.py`)
+- [ ] **Observability**: log every call, tool use, result and token count; trace a full agent run (📘 `16_observability.py`)
+- [ ] **Async and parallel tools**: run independent tool calls at the same time (📘 `17_async_parallel.py`)
+- [ ] **Batch API**: process many requests cheaply when you don't need instant answers (📘 `17b_batch_api.py`)
+- [ ] **Deployment**: wrap the agent in a web API (FastAPI) or a simple UI (📘 `18_deployment/`: access keys, per-user history, rate limit, Docker, HTTPS with Caddy; guide in `18_deployment/README.md`)
+- [ ] **Capstone project**: build a complete agent that solves a real problem end to end (📘 `19_capstone/CAPSTONE.md` + `starter_agent.py`)
 
 ---
 
-## Suggested Next Lessons
+## Lesson Plan
+
+Study in this order. ✅ = studied, 📘 = written and tested, ready to study.
 
 | Lesson file | Topics |
 |---|---|
@@ -123,17 +125,31 @@ Streamlit vs Gradio vs FastAPI: Streamlit reruns your script top to bottom and y
 | `06d_tool_choice.py` | `tool_choice` auto / none / any / tool, `disable_parallel_tool_use`, the `claude-opus-5-5` way to require a tool ✅ |
 | `07_structured_output.py` | JSON by prompt vs `output_config` JSON schema vs Pydantic + `messages.parse()` ✅ |
 | `07b_extended_thinking.py` | Effort levels, thinking summaries, streaming thinking, thinking in a tool loop, cost of thinking tokens ✅ |
-| `07c_vision_files.py` | Images and PDFs (**next**) |
-| `08_context_management.py` | Trimming, summarising, prompt caching, cost tracking |
-| `09_long_term_memory.py` | Save and load facts across sessions |
-| `10_rag.py` | Embeddings, retrieval, answering from documents |
-| `11_planning_agent.py` | ReAct, plan-and-execute, reflection |
-| `12_multi_agent.py` | Orchestrator + sub-agents |
-| `13_mcp.py` | Connect to and build an MCP server |
-| `14_eval.py` | Test set and scoring for your agent |
+| `07c_vision_files.py` | Images (base64 / URL), several images, PDFs, Files API upload + reuse, citations 📘 (**next**) |
+| `08_context_management.py` | Token growth, context window, trimming, summarising, server-side compaction, auto-summary chat 📘 |
+| `08b_prompt_caching.py` | Cache a long system prompt, a timestamp that breaks the cache, caching a growing chat 📘 |
+| `08c_cost_tracking.py` | `UsageTracker`: cost per call / question / session, estimate before sending, session budget 📘 |
+| `08d_model_selection.py` | Same tasks on Haiku / Sonnet / Opus (correctness, time, cost), a model router 📘 |
+| `09_long_term_memory.py` | `remember` / `forget` tools, facts file, frozen system prompt per session, extract facts after a chat 📘 |
+| `10_rag.py` | Chunking, TF-IDF vectors (numpy), vector store, retrieval, RAG with citations, agentic RAG 📘 |
+| `11_planning_agent.py` | ReAct (visible thought/action/observation), plan-and-execute, reflection (code checks + LLM critic) 📘 |
+| `11b_tool_runner.py` | `@beta_tool`, `until_done()`, iterating turns, `ToolError`, approval inside a tool, chat 📘 |
+| `11c_server_tools.py` | Web search, web fetch (domain allow-list), code execution + file download, `pause_turn` 📘 |
+| `12_multi_agent.py` | Orchestrator + analyst / writer / reviewer, parallel sub-agents, writer-reviewer loop 📘 |
+| `13_mcp_server.py` + `13_mcp_client.py` | Build an MCP server (tools, resource, prompt); connect it to the tool runner 📘 |
+| `13b_agent_sdk.py` | Claude Agent SDK: built-in tools, custom tool, PreToolUse hook, sub-agent, multi-turn client 📘 |
+| `14_eval.py` | Test set, code checks, LLM-as-judge, prompt A vs B, case-by-case diff, saved results 📘 |
+| `15_guardrails_hitl.py` | Role allow-lists, tool input checks, limits, human approval, output filter, refusal fallback 📘 |
+| `15b_prompt_injection.py` | Poisoned review, least privilege, marked untrusted data, detector, reader/doer split 📘 |
+| `16_observability.py` | Traces and spans to JSONL, request ids, a trace viewer 📘 |
+| `17_async_parallel.py` | `AsyncAnthropic` + `gather`, semaphore, parallel tool calls in the loop 📘 |
+| `17b_batch_api.py` | Submit / status / wait / results by `custom_id`, 50% price 📘 |
+| `18_deployment/` | Production FastAPI chat, Docker, HTTPS with Caddy, deploy checklist 📘 |
+| `19_capstone/` | Project brief, requirements checklist, milestones, runnable starter agent 📘 |
 
 ## Changelog
 
+- **2026-09-30**: Wrote lessons for all 26 remaining topics (`07c` to `19_capstone/`), each in the same style (docstring with KEY IDEA, numbered demos, menu or command-line demo number). Every lesson was run with real API calls (estimated US$3-4 in total); findings are written into each file. Highlights: `08b` caching cut 3 calls from $0.035 to $0.020, and a timestamp in the system prompt stopped every cache hit; `08d` Haiku got the hard puzzle wrong (65 vs 154) while Sonnet and Opus got it right; `14_eval` prompt B passed 10/10 vs 5/10 for prompt A; `15b` Claude spotted the injected review by itself, and the layers still block a fooled model; `17` parallel tool calls cut tool time from 8 s to 2 s; `18_deployment` Docker image built and ran as a non-root user. API notes found on the way: a big `max_tokens` needs streaming on Haiku; streamed messages have `stream.request_id`, not `._request_id`; an `AsyncAnthropic` client can't be reused across `asyncio.run()` calls; `mcp` 2.x renamed `FastMCP` to `MCPServer`; the Agent SDK's sub-agent tool is now called `Agent`. Installed in the venv: `pillow`, `mcp`, `claude-agent-sdk`.
 - **2026-09-29**: `07b_extended_thinking.py`: 4 demos on `claude-opus-5-5`: effort low / medium / high on one puzzle, `display` omitted vs summarized, streaming the thinking summary, thinking in a manual tool loop (reply appended unchanged). Tested with real API calls (under $0.10 in total). Found: on an easy puzzle all three efforts were right, with about the same time (~3.5 s) and tokens (~300), so effort only matters on hard work. With `omitted` the thinking block comes back with empty text but is still billed. In the tool loop Claude skipped thinking entirely (adaptive).
 - **2026-09-28**: `07_structured_output.py`: 4 messy customer messages turned into data 3 ways. Tested with real API calls: asking for JSON in the prompt returned it inside ```json fences (so `json.loads` failed) and made up an intent (`place_order`); `output_config` JSON schema and `messages.parse()` with a Pydantic model gave valid data every time; the results are then counted with plain Python.
 - **2026-09-28**: `06c_real_tools.py`: 5 real tools: weather from Open-Meteo (no key; `requests` with a timeout), `list_notes` / `read_note` / `write_note` locked to `lesson_data/notes/` (blocks `../`, only .txt/.md), `query_database` on a sample shop DB opened read-only. Tested offline (16 safety checks) and with real API calls. Found: "Read ../.env" is blocked by Anthropic's safety filter (`stop_reason: "refusal"`, empty reply), so the loop now handles refusals and forgets the refused question. Installed `requests` in the venv.

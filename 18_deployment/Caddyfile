@@ -1,0 +1,5 @@
+# Caddy is a web server that gets and renews HTTPS certificates for you (free, Let's Encrypt).
+# Replace chat.example.com with your domain. Its DNS "A record" must point to your server's IP.
+chat.example.com {
+    reverse_proxy 127.0.0.1:8000
+}
